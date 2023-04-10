@@ -22,11 +22,11 @@
       </div>
       <div class="cmd-body">
         <p>Welcome to Secure Search Space.</p>
-        <div class="cmd-input-container">
-          <input type="text" id="cmd-input" placeholder="Type your query here..." maxlength="25">
-
-          <button id="cmd-search-btn">Search</button>
-        </div>
+    <div class="cmd-input-container">
+    <input type="text" id="cmd-input" placeholder="Type your query here..." maxlength="25">
+    <button id="cmd-search-btn" onclick="search()">Search</button>
+    <button id="cmd-clear-btn" onclick="clearInput()">Clear</button>
+</div>
         <div id="cmd-output-container">
           <div id="cmd-output"></div>
         </div>
@@ -238,21 +238,25 @@ function search() {
   });
   displayResults(results);
 }
-      const cmdInput = document.getElementById("cmd-input");
-      const cmdSearchButton = document.getElementById("cmd-search-button");
-      const cmdOutput = document.getElementById("cmd-output");
+function clearInput() {
+    document.getElementById("cmd-input").value = "";
+}
 
-      cmdInput.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          search(cmdInput.value);
-        }
-      });
+ const cmdInput = document.getElementById("cmd-input");
+const cmdSearchButton = document.getElementById("cmd-search-button");
+const cmdOutput = document.getElementById("cmd-output");
 
-      cmdSearchButton.addEventListener("click", function(event) {
-        event.preventDefault();
-        search(cmdInput.value);
-      });
+cmdInput.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    search(cmdInput.value);
+  }
+});
+
+cmdSearchButton.addEventListener("click", function(event) {
+  event.preventDefault();
+  search(cmdInput.value);
+});
 
 function search(query) {
   const inputRegex = /[<>]/; // disallow angle brackets
@@ -297,6 +301,7 @@ function search(query) {
 
   cmdOutput.innerHTML = output;
 }
+
 
  
     </script>
@@ -362,15 +367,34 @@ body {
 }
 
 #cmd-search-btn {
-  background-color: #0b7285;
-  color: #fff;
+  background-color: #008CBA;
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+#cmd-clear-btn {
+  background-color: #ccc;
   border: none;
   border-radius: 5px;
-  font-size: 1.2rem;
-  padding: 0.5rem 1rem;
-  margin-left: 1rem;
+  color: #fff;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px;
+  margin-left: 10px;
 }
+
+#cmd-clear-btn:hover {
+  background-color: #666;
+}
+
 
 #cmd-output {
   margin-top: 1rem;
