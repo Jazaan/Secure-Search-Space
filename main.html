@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Search Engine</title>
+<head>
+  <title>Search Engine</title>
   <script src="data.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <style>
+  <link rel="stylesheet" href="style.css">
+  <style>
       h1 {
         font-size: 36px;
         font-weight: bold;
@@ -17,37 +16,38 @@
       }
     </style>
   </head>
-  <body>
-    <div class="cmd-container">
-      <div class="cmd-header">
-        <span class="cmd-title">Secure Search Space</span>
+<body>
+  <div class="cmd-container">
+    <div class="cmd-header">
+      <span class="cmd-title">Secure Search Space</span>
+    </div>
+    <div class="cmd-body">
+      <p>Welcome to Secure Search Space.</p>
+      <div class="cmd-input-container">
+        <input type="text" id="cmd-input" placeholder="Type your query here..." maxlength="25">
+        <button id="cmd-search-btn" onclick="search()">Search</button>
+        <button id="cmd-clear-btn" onclick="clearInput()">Clear</button>
       </div>
-      <div class="cmd-body">
-        <p>Welcome to Secure Search Space.</p>
-    <div class="cmd-input-container">
-    <input type="text" id="cmd-input" placeholder="Type your query here..." maxlength="25">
-    <button id="cmd-search-btn" onclick="search()">Search</button>
-    <button id="cmd-clear-btn" onclick="clearInput()">Clear</button>
-</div>
-        <div id="cmd-output-container">
-          <div id="cmd-output"></div>
-        </div>
-      </div>
-      <div class="cmd-footer">
-        <ul>
-          <li><a href="https://github.com/Jazaan/Secure-Search-Space/blob/main/README.md">About</a></li>
-        </ul>
+      <div id="cmd-output-container">
+        <div id="cmd-output"></div>
       </div>
     </div>
+    <div class="cmd-footer">
+      <ul>
+        <li><a href="https://github.com/Jazaan/Secure-Search-Space/blob/main/README.md">About</a></li>
+      </ul>
+    </div>
+  </div>
 
-    <script>
-function search() {
-      const query = DOMPurify.sanitize(document.getElementById("cmd-input").value);
+  <script>
+    function search() {
+      const query = document.getElementById("cmd-input").value;
+      const sanitizedQuery = sanitizeInput(query);
       const results = data.filter(item => {
         const keys = Object.keys(item);
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
-          if (typeof item[key] === 'string' && item[key].toLowerCase().includes(query.toLowerCase())) {
+          if (typeof item[key] === 'string' && item[key].toLowerCase().includes(sanitizedQuery.toLowerCase())) {
             return true;
           }
         }
@@ -56,33 +56,54 @@ function search() {
       displayResults(results);
     }
 
+    function displayResults(results) {
+      const outputContainer = document.getElementById("cmd-output");
+      outputContainer.innerHTML = ""; // Clear previous results
 
-function sanitizeInput(input) {
-  console.log("input value: " + input); // add this line
-  return input.replace(/[^a-zA-Z0-9\s]/g, '');
-}
+      if (results.length === 0) {
+        outputContainer.innerHTML = `<div>No results found.</div>`;
+        return;
+      }
 
-function search() {
-  const query = sanitizeInput(document.getElementById("cmd-input").value);
-  const results = data.filter((item) => {
-    return item.keywords.toLowerCase().includes(query.toLowerCase());
-  });
-  displayResults(results);
-}
-function clearInput() {
-    document.getElementById("cmd-input").value = "";
-}
+      results.forEach(item => {
+        const resultDiv = document.createElement("div");
+        const nameLink = document.createElement("a");
+        nameLink.href = item.url;
+        nameLink.target = "_blank";
+        nameLink.innerText = item.name;
+        const description = document.createElement("div");
+        description.innerText = item.description;
 
- const cmdInput = document.getElementById("cmd-input");
-const cmdSearchButton = document.getElementById("cmd-search-button");
-const cmdOutput = document.getElementById("cmd-output");
+        resultDiv.appendChild(nameLink);
+        resultDiv.appendChild(description);
+        outputContainer.appendChild(resultDiv);
+      });
+    }
 
-cmdInput.addEventListener("keydown", function(event) {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    search(cmdInput.value);
-  }
-});
+    function clearInput() {
+      document.getElementById("cmd-input").value = "";
+    }
+
+    function sanitizeInput(input) {
+      // Sanitize the input by escaping special characters
+      return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    const cmdInput = document.getElementById("cmd-input");
+    const cmdSearchButton = document.getElementById("cmd-search-button");
+    const cmdOutput = document.getElementById("cmd-output");
+
+    cmdInput.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        search(cmdInput.value);
+      }
+    });
+
+    cmdSearchButton.addEventListener("click", function(event) {
+      event.preventDefault();
+      search(cmdInput.value);
+    });
 
 cmdSearchButton.addEventListener("click", function(event) {
   event.preventDefault();
