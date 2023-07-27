@@ -39,107 +39,101 @@
       </div>
     </div>
 
-   <script>
-    function search(query) {
-      const inputRegex = /[<>]/; // disallow angle brackets
-      const cmdOutput = document.getElementById("cmd-output");
-
-      if (query === "") {
-        cmdOutput.innerText = "Please enter a search query.";
-        return;
+    <script>
+function search(query) {
+  const results = data.filter(item => {
+    const keys = Object.keys(item);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      if (typeof item[key] === 'string' && item[key].toLowerCase().includes(query.toLowerCase())) {
+        return true;
       }
+    }
+    return false;
+  });
+  return results;
+}
 
-      if (inputRegex.test(query)) {
-        cmdOutput.innerText = "Invalid input. Please try again.";
-        return;
+
+function sanitizeInput(input) {
+  console.log("input value: " + input); // add this line
+  return input.replace(/[^a-zA-Z0-9\s]/g, '');
+}
+
+function search() {
+  const query = sanitizeInput(document.getElementById("cmd-input").value);
+  const results = data.filter((item) => {
+    return item.keywords.toLowerCase().includes(query.toLowerCase());
+  });
+  displayResults(results);
+}
+function clearInput() {
+    document.getElementById("cmd-input").value = "";
+}
+
+ const cmdInput = document.getElementById("cmd-input");
+const cmdSearchButton = document.getElementById("cmd-search-button");
+const cmdOutput = document.getElementById("cmd-output");
+
+cmdInput.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    search(cmdInput.value);
+  }
+});
+
+cmdSearchButton.addEventListener("click", function(event) {
+  event.preventDefault();
+  search(cmdInput.value);
+});
+
+function search(query) {
+  const inputRegex = /[<>]/; // disallow angle brackets
+  if (inputRegex.test(query)) {
+    cmdOutput.innerHTML = "Invalid input. Please try again.";
+    return;
+  }
+
+  const index = {}; // create an index of keywords for each item in the data array
+  data.forEach(item => {
+    const keywords = [item.name.toLowerCase(), item.description.toLowerCase()].join(" ").split(/\W+/);
+    keywords.forEach(keyword => {
+      if (keyword.length >1) { // only index keywords that are longer than 2 characters
+        if (!index[keyword]) {
+          index[keyword] = [];
+        }
+        index[keyword].push(item);
       }
+    });
+  });
 
-      const results = data.filter(item => {
-        return item.keywords.toLowerCase().includes(query.toLowerCase());
+  const results = [];
+  const queryKeywords = query.toLowerCase().split(/\W+/); // split query into keywords
+  queryKeywords.forEach(keyword => {
+    if (index[keyword]) {
+      index[keyword].forEach(item => {
+        if (!results.includes(item)) {
+          results.push(item); // add each item to results only once
+        }
       });
-
-      if (results.length === 0) {
-        cmdOutput.innerText = `No results found for '${query}'`;
-        return;
-      }
-
-      const output = results.map(item =>
-        `<div><strong><a href="${item.url}" target="_blank">${item.name}</a></strong><br>${item.description}</div>`
-      ).join("");
-
-      cmdOutput.innerHTML = output;
     }
+  });
 
-    function clearInput() {
-      document.getElementById("cmd-input").value = "";
-      document.getElementById("cmd-output").innerText = "";
-    }
+  if (results.length === 0) {
+    cmdOutput.innerHTML = `No results found for '${query}'`;
+    return;
+  }
 
-    const cmdInput = document.getElementById("cmd-input");
-    const cmdSearchButton = document.getElementById("cmd-search-btn");
+  const output = results.map(item =>
+    `<div><strong><a href="${item.url}" target="_blank">${item.name}</a></strong><br>${item.description}</div>`
+  ).join("");
 
-    cmdInput.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        search(cmdInput.value);
-      }
-    });
+  cmdOutput.innerHTML = output;
+}
 
-    cmdSearchButton.addEventListener("click", function(event) {
-      event.preventDefault();
-      search(cmdInput.value);
-    });
-  </script> <script>
-    function search(query) {
-      const inputRegex = /[<>]/; // disallow angle brackets
-      const cmdOutput = document.getElementById("cmd-output");
 
-      if (query === "") {
-        cmdOutput.innerText = "Please enter a search query.";
-        return;
-      }
-
-      if (inputRegex.test(query)) {
-        cmdOutput.innerText = "Invalid input. Please try again.";
-        return;
-      }
-
-      const results = data.filter(item => {
-        return item.keywords.toLowerCase().includes(query.toLowerCase());
-      });
-
-      if (results.length === 0) {
-        cmdOutput.innerText = `No results found for '${query}'`;
-        return;
-      }
-
-      const output = results.map(item =>
-        `<div><strong><a href="${item.url}" target="_blank">${item.name}</a></strong><br>${item.description}</div>`
-      ).join("");
-
-      cmdOutput.innerHTML = output;
-    }
-
-    function clearInput() {
-      document.getElementById("cmd-input").value = "";
-      document.getElementById("cmd-output").innerText = "";
-    }
-
-    const cmdInput = document.getElementById("cmd-input");
-    const cmdSearchButton = document.getElementById("cmd-search-btn");
-
-    cmdInput.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        search(cmdInput.value);
-      }
-    });
-
-    cmdSearchButton.addEventListener("click", function(event) {
-      event.preventDefault();
-      search(cmdInput.value);
-    });
-  </script>
+ 
+    </script>
 
     <style>
   {
