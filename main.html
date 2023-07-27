@@ -3,6 +3,7 @@
   <head>
     <title>Search Engine</title>
   <script src="data.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
       h1 {
@@ -40,19 +41,20 @@
     </div>
 
     <script>
-function search(query) {
-  const results = data.filter(item => {
-    const keys = Object.keys(item);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (typeof item[key] === 'string' && item[key].toLowerCase().includes(query.toLowerCase())) {
-        return true;
-      }
+function search() {
+      const query = DOMPurify.sanitize(document.getElementById("cmd-input").value);
+      const results = data.filter(item => {
+        const keys = Object.keys(item);
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (typeof item[key] === 'string' && item[key].toLowerCase().includes(query.toLowerCase())) {
+            return true;
+          }
+        }
+        return false;
+      });
+      displayResults(results);
     }
-    return false;
-  });
-  return results;
-}
 
 
 function sanitizeInput(input) {
