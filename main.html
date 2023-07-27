@@ -105,11 +105,6 @@
       search(cmdInput.value);
     });
 
-cmdSearchButton.addEventListener("click", function(event) {
-  event.preventDefault();
-  search(cmdInput.value);
-});
-
 function search(query) {
   const inputRegex = /[<>]/; // disallow angle brackets
   if (inputRegex.test(query)) {
