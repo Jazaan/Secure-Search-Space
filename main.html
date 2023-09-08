@@ -3,268 +3,149 @@
 <head>
   <title>Search Engine</title>
   <script src="data.js"></script>
-  <link rel="stylesheet" href="style.css">
   <style>
-      h1 {
-        font-size: 36px;
-        font-weight: bold;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: #423d3d;
-        margin: 50px 0;
-      }
-    </style>
-  </head>
+    body {
+      background-color: #f5f5f5;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .gui-container {
+      background-color: #f5f5f5;
+      color: #333;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .gui-header {
+      background-color: #0b7285;
+      padding: 1rem;
+      text-align: center;
+      color: white;
+    }
+
+    .gui-main {
+      padding: 1rem;
+      flex-grow: 1;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    #gui-input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1.2rem;
+      border: 2px solid #0b7285;
+      border-radius: 4px;
+    }
+
+    #gui-search-btn,
+    #gui-clear-btn {
+      background-color: #0b7285;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-left: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #gui-search-btn:hover,
+    #gui-clear-btn:hover {
+      background-color: #075e6f;
+    }
+
+    #gui-results {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
 <body>
-  <div class="cmd-container">
-    <div class="cmd-header">
-      <span class="cmd-title">Secure Search Space</span>
-    </div>
-    <div class="cmd-body">
-      <p>Welcome to Secure Search Space.</p>
-      <div class="cmd-input-container">
-        <input type="text" id="cmd-input" placeholder="Type your query here..." maxlength="25">
-        <button id="cmd-search-btn" onclick="search()">Search</button>
-        <button id="cmd-clear-btn" onclick="clearInput()">Clear</button>
+  <div class="gui-container">
+    <header class="gui-header">
+      <h1>Secure Search Space</h1>
+    </header>
+    <main class="gui-main">
+      <div class="search-container">
+        <input type="text" id="gui-input" placeholder="Type your query here..." maxlength="25">
+        <button id="gui-search-btn">Search</button>
+        <button id="gui-clear-btn">Clear</button>
       </div>
-      <div id="cmd-output-container">
-        <div id="cmd-output"></div>
-      </div>
-    </div>
-    <div class="cmd-footer">
+      <div id="gui-results"></div>
+    </main>
+    <footer class="gui-footer">
       <ul>
         <li><a href="https://github.com/Jazaan/Secure-Search-Space/blob/main/README.md">About</a></li>
       </ul>
-    </div>
+    </footer>
   </div>
 
   <script>
-    function search() {
-      const query = document.getElementById("cmd-input").value;
-      const sanitizedQuery = sanitizeInput(query);
-      const results = data.filter(item => {
-        const keys = Object.keys(item);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          if (typeof item[key] === 'string' && item[key].toLowerCase().includes(sanitizedQuery.toLowerCase())) {
-            return true;
-          }
+    document.addEventListener("DOMContentLoaded", function () {
+      const guiInput = document.getElementById("gui-input");
+      const guiSearchButton = document.getElementById("gui-search-btn");
+      const guiClearButton = document.getElementById("gui-clear-btn");
+      const guiResults = document.getElementById("gui-results");
+
+      function search(query) {
+        if (query.trim() === "") {
+          // If query is empty, clear the results
+          guiResults.innerHTML = "";
+          return;
         }
-        return false;
-      });
-      displayResults(results);
-    }
 
-    function displayResults(results) {
-      const outputContainer = document.getElementById("cmd-output");
-      outputContainer.innerHTML = ""; // Clear previous results
+        const inputRegex = /[<>]/; // disallow angle brackets
+        if (inputRegex.test(query)) {
+          guiResults.innerHTML = "Invalid input. Please try again.";
+          return;
+        }
 
-      if (results.length === 0) {
-        outputContainer.innerHTML = `<div>No results found.</div>`;
-        return;
+        const results = data.filter(item => {
+          return (
+            item.name.toLowerCase().includes(query.toLowerCase()) ||
+            item.description.toLowerCase().includes(query.toLowerCase())
+          );
+        });
+
+        if (results.length === 0) {
+          guiResults.innerHTML = `No results found for '${query}'`;
+          return;
+        }
+
+        const output = results
+          .map(
+            item =>
+              `<div><strong><a href="${item.url}" target="_blank">${item.name}</a></strong><br>${item.description}</div>`
+          )
+          .join("");
+
+        guiResults.innerHTML = output;
       }
 
-      results.forEach(item => {
-        const resultDiv = document.createElement("div");
-        const nameLink = document.createElement("a");
-        nameLink.href = item.url;
-        nameLink.target = "_blank";
-        nameLink.innerText = item.name;
-        const description = document.createElement("div");
-        description.innerText = item.description;
-
-        resultDiv.appendChild(nameLink);
-        resultDiv.appendChild(description);
-        outputContainer.appendChild(resultDiv);
+      guiSearchButton.addEventListener("click", function () {
+        const query = guiInput.value;
+        search(query);
       });
-    }
 
-    function clearInput() {
-      document.getElementById("cmd-input").value = "";
-    }
+      guiClearButton.addEventListener("click", function () {
+        guiInput.value = "";
+        guiResults.innerHTML = "";
+      });
 
-    function sanitizeInput(input) {
-      // Sanitize the input by escaping special characters
-      return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    const cmdInput = document.getElementById("cmd-input");
-    const cmdSearchButton = document.getElementById("cmd-search-button");
-    const cmdOutput = document.getElementById("cmd-output");
-
-    cmdInput.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        search(cmdInput.value);
-      }
-    });
-
-    cmdSearchButton.addEventListener("click", function(event) {
-      event.preventDefault();
-      search(cmdInput.value);
-    });
-
-function search(query) {
-  const inputRegex = /[<>]/; // disallow angle brackets
-  if (inputRegex.test(query)) {
-    cmdOutput.innerHTML = "Invalid input. Please try again.";
-    return;
-  }
-
-  const index = {}; // create an index of keywords for each item in the data array
-  data.forEach(item => {
-    const keywords = [item.name.toLowerCase(), item.description.toLowerCase()].join(" ").split(/\W+/);
-    keywords.forEach(keyword => {
-      if (keyword.length >1) { // only index keywords that are longer than 2 characters
-        if (!index[keyword]) {
-          index[keyword] = [];
-        }
-        index[keyword].push(item);
-      }
-    });
-  });
-
-  const results = [];
-  const queryKeywords = query.toLowerCase().split(/\W+/); // split query into keywords
-  queryKeywords.forEach(keyword => {
-    if (index[keyword]) {
-      index[keyword].forEach(item => {
-        if (!results.includes(item)) {
-          results.push(item); // add each item to results only once
+      guiInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          const query = guiInput.value;
+          search(query);
         }
       });
-    }
-  });
-
-  if (results.length === 0) {
-    cmdOutput.innerHTML = `No results found for '${query}'`;
-    return;
-  }
-
-  const output = results.map(item =>
-    `<div><strong><a href="${item.url}" target="_blank">${item.name}</a></strong><br>${item.description}</div>`
-  ).join("");
-
-  cmdOutput.innerHTML = output;
-}
-
-
- 
-    </script>
-
-    <style>
-  {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: #f5f5f5;
-}
-
-.cmd-container {
-  background-color: #333;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.cmd-header {
-  background-color: #0b7285;
-  padding: 0.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.cmd-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.cmd-body {
-  padding: 1rem;
-  flex-grow: 1;
-  background-color: #222;
-}
-
-.cmd-body p {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  line-height: 1.5;
-}
-
-.cmd-input-container {
-  display: flex;
-  margin-bottom: 1rem;
-}
-
-#cmd-input {
-  flex: 1;
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid #fff;
-  color: #fff;
-  font-size: 1.2rem;
-  padding: 0.5rem;
-}
-
-#cmd-search-btn {
-  background-color: #008CBA;
-  border: none;
-  color: white;
-  padding: 10px 24px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-#cmd-clear-btn {
-  background-color: #ccc;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 10px;
-  margin-left: 10px;
-}
-
-#cmd-clear-btn:hover {
-  background-color: #666;
-}
-
-
-#cmd-output {
-  margin-top: 1rem;
-}
-
-#cmd-output div {
-  margin-bottom: 1rem;
-}
-
-#cmd-output strong {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-#cmd-output a {
-  color: #fff;
-  text-decoration: none;
-  border-bottom: 1px solid #fff;
-}
-
-#cmd-output a:hover {
-  border-bottom: none;
-}
-    </style>
-  </body>
+    });
+  </script>
+</body>
 </html>
